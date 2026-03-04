@@ -5,7 +5,7 @@ import java.util.UUID;
 
 public class UserResponse {
 	
-	private UUID id;
+	private UUID tenantId;
 	private String email;
 	private String name;
 	private String status;
@@ -13,21 +13,23 @@ public class UserResponse {
 	
 	public UserResponse() {}
 	
-	public UserResponse(UUID id, String email, String name, String status, Instant createdAt) {
+	public UserResponse(UUID tenantId, String email, String name, String status, Instant createdAt) {
 		super();
-		this.id = id;
+		this.tenantId = tenantId;
 		this.email = email;
 		this.name = name;
 		this.status = status;
 		this.createdAt = createdAt;
 	}
 		
-	public UUID getId() {
-		return id;
+	public UUID getTenantId() {
+		return tenantId;
 	}
-	public void setId(UUID id) {
-		this.id = id;
+
+	public void setTenantId(UUID tenantId) {
+		this.tenantId = tenantId;
 	}
+
 	public String getEmail() {
 		return email;
 	}

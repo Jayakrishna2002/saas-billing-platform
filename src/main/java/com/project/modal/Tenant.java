@@ -17,7 +17,7 @@ import lombok.Setter;
 
 @Entity
 @Table (name = "tenants")
-public class Tenants {
+public class Tenant {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.UUID)
@@ -30,9 +30,9 @@ public class Tenants {
 	@Column(name = "created_at", updatable = false)
 	private Instant createdAt;
 	
-	public Tenants() {}
+	public Tenant() {}
 
-	public Tenants(UUID id, String name, Instant createdAt) {
+	public Tenant(UUID id, String name, Instant createdAt) {
 		super();
 		this.id = id;
 		this.name = name;

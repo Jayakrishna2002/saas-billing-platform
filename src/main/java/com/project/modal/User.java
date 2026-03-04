@@ -24,7 +24,7 @@ import lombok.Setter;
 
 @Entity
 @Table(name = "users", uniqueConstraints = { @UniqueConstraint(columnNames = { "tenant_id", "email" }) })
-public class Users {
+public class User {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.UUID)
@@ -33,7 +33,7 @@ public class Users {
 	
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "tenant_id", nullable = false)
-	private Tenants tenant;
+	private Tenant tenant;
 	
 	@Column(name = "email", nullable = false)
 	private String email;
@@ -47,9 +47,9 @@ public class Users {
 	@Column(name = "created_at", updatable = false)
 	private Instant createdAt;
 	
-	public Users() {}
+	public User() {}
 
-	public Users(UUID id, Tenants tenant, String email, String name, String status, Instant createdAt) {
+	public User(UUID id, Tenant tenant, String email, String name, String status, Instant createdAt) {
 		super();
 		this.id = id;
 		this.tenant = tenant;
@@ -67,11 +67,11 @@ public class Users {
 		this.id = id;
 	}
 
-	public Tenants getTenant() {
+	public Tenant getTenant() {
 		return tenant;
 	}
 
-	public void setTenant(Tenants tenant) {
+	public void setTenant(Tenant tenant) {
 		this.tenant = tenant;
 	}
 

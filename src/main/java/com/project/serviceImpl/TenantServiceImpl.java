@@ -7,7 +7,7 @@ import java.util.UUID;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.project.modal.Tenants;
+import com.project.modal.Tenant;
 import com.project.repository.TenantRepository;
 import com.project.service.TenantService;
 
@@ -22,12 +22,12 @@ public class TenantServiceImpl implements TenantService{
 	}
 
 	@Override
-	public ArrayList<Tenants> findAll() {
-		return (ArrayList<Tenants>) tenantRepository.findAll();
+	public ArrayList<Tenant> findAll() {
+		return (ArrayList<Tenant>) tenantRepository.findAll();
 	}
 
 	@Override
-	public Optional<Tenants> findById( UUID tenantId ) {
+	public Optional<Tenant> findById( UUID tenantId ) {
 		return tenantRepository.findById(tenantId);
 	}
 	
