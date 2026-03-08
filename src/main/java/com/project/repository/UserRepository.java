@@ -13,11 +13,9 @@ import com.project.modal.User;
 @Repository
 public interface UserRepository extends JpaRepository<User, UUID>{
 	
-	public Page<User> findByTenant_Id( UUID tenantId, Pageable pageable );
+	public Page<User> findByTenant_IdAndStatus( UUID tenantId, Pageable pageable, boolean status );
 	
-	public Optional<User> findByIdAndTenant_Id( UUID userId, UUID tenantId );
-	
-	public void deleteByIdAndTenant_Id( UUID userId, UUID tenantId );
+	public Optional<User> findByIdAndTenant_IdAndStatus( UUID userId, UUID tenantId, boolean status );
 	
 	public boolean existsByEmailAndTenant_Id( String email, UUID tenantId );
 }

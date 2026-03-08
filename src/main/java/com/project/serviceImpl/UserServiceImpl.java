@@ -1,10 +1,6 @@
 package com.project.serviceImpl;
 
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -17,13 +13,19 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.project.dto.CreateUserRequest;
 import com.project.dto.UserResponse;
+import com.project.exception.conflict.DuplicateUserException;
+import com.project.exception.notFound.TenantNotFoundException;
+import com.project.exception.notFound.UserNotFoundException;
 import com.project.modal.Tenant;
 import com.project.modal.User;
 import com.project.repository.TenantRepository;
 import com.project.repository.UserRepository;
 import com.project.service.UserService;
 
+import lombok.extern.slf4j.Slf4j;
+
 @Service
+@Slf4j
 public class UserServiceImpl implements UserService {
 	
 	@Autowired
@@ -37,29 +39,33 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public UserResponse createUser( UUID tenantId, CreateUserRequest request ) {
-		
+	public UserResponse createUser(UUID tenantId, CreateUserRequest request) {
+
 		if (tenantId == null) {
-	        throw new IllegalArgumentException("Tenant ID must not be null");
-	    }
-		
-		Tenant tenant = tenantRepository.findById(tenantId).orElseThrow(() -> new RuntimeException("Tenant not found"));
-		
+			throw new IllegalArgumentException("Tenant ID must not be null");
+		}
+
+		Tenant tenant = tenantRepository.findById(tenantId)
+				.orElseThrow(() -> new TenantNotFoundException("Tenant not found"));
+
+		String emailLower = request.getEmail().toLowerCase().trim();
+
 		User user = new User();
-		user.setId(UUID.randomUUID());
-		user.setTenant( tenant); 
-		user.setEmail(request.getEmail());
-	    user.setName(request.getName());
-	    user.setStatus("ACTIVE");
-	    user.setCreatedAt( Instant.now() );
-	    
-	    try {
-	        userRepository.save(user);
-	    } catch (DataIntegrityViolationException ex) {
-	        throw new RuntimeException("Email already exists for this tenant");
-	    }
-	    
-	    return new UserResponse( user.getTenant().getId(), user.getEmail(), user.getName(), user.getStatus(), user.getCreatedAt() );
+		user.setTenant(tenant);
+		user.setEmail(emailLower);
+		user.setName(request.getName());
+		user.setStatus(true);
+
+		boolean isEmailExist = userRepository.existsByEmailAndTenant_Id(user.getEmail(), tenantId);
+		log.error("isEmailExist" + isEmailExist);
+
+		log.error("Email : " + user.getEmail());
+
+		if (isEmailExist) {
+			new DuplicateUserException("Email already exists for this tenant");
+		}
+		User savedUser = userRepository.save(user);
+		return mapToResponse(savedUser);
 	}
 
 	@Override
@@ -69,7 +75,7 @@ public class UserServiceImpl implements UserService {
 			throw new IllegalArgumentException("Tenant ID must not be null");	
 		}
 
-		return userRepository.findByTenant_Id(tenantId, pageable).map(this:: mapToResponse);
+		return userRepository.findByTenant_IdAndStatus(tenantId, pageable, true).map(this:: mapToResponse);
 	}
 
 	@Override
@@ -79,17 +85,37 @@ public class UserServiceImpl implements UserService {
 			throw new IllegalArgumentException("Tenant ID or User Id must not be null");
 		}
 				
-		return userRepository.findByIdAndTenant_Id(userId, tenantId).map(this::mapToResponse);
+		return userRepository.findByIdAndTenant_IdAndStatus(userId, tenantId, true).map(this::mapToResponse);
 	}
 	
 	private UserResponse mapToResponse(User user) {
-		return new UserResponse(user.getTenant().getId(), user.getEmail(), user.getName(), user.getStatus(), user.getCreatedAt());
+		return new UserResponse(user.getTenant().getId(), user.getEmail(), user.getName(), user.isStatus(), user.getCreatedAt());
 	}
 
 	@Override
 	@Transactional
-	public void deleteByUserIdAndTenantId(UUID userId, UUID tenantId) {
-		userRepository.deleteByIdAndTenant_Id( userId, tenantId );
+	public UserResponse deleteUser(UUID userId, UUID tenantId) {
+		
+		if (tenantId == null || userId == null) {
+			throw new IllegalArgumentException("Tenant ID or User Id must not be null");
+		}
+		
+		User user = userRepository.findByIdAndTenant_IdAndStatus(userId, tenantId, true)
+					.orElseThrow(() -> new UserNotFoundException("User Not Found"));
+		
+		user.setStatus(false);
+		user.setDeleteAt( Instant.now() );
+		userRepository.save(user);
+		
+		UserResponse userRes = new UserResponse(
+									user.getTenant().getId(), 
+									user.getEmail(),
+									user.getName(),
+									user.isStatus(),
+									user.getCreatedAt()
+								);
+		
+		return userRes;
 	}
 
 	@Override

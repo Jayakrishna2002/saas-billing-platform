@@ -1,6 +1,5 @@
 package com.project.service;
 
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -9,7 +8,6 @@ import org.springframework.data.domain.Pageable;
 
 import com.project.dto.CreateUserRequest;
 import com.project.dto.UserResponse;
-import com.project.modal.User;
 
 public interface UserService {
 	
@@ -21,5 +19,5 @@ public interface UserService {
 	
 	public boolean existsByEmailAndTenantId(String email, UUID tenantId);
 	
-	public void deleteByUserIdAndTenantId( UUID userId, UUID tenantId );
+	public UserResponse deleteUser( UUID userId, UUID tenantId );
 }
