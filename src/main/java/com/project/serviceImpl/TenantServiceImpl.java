@@ -1,3 +1,4 @@
+
 package com.project.serviceImpl;
 
 import java.util.ArrayList;
@@ -12,23 +13,27 @@ import com.project.repository.TenantRepository;
 import com.project.service.TenantService;
 
 @Service
-public class TenantServiceImpl implements TenantService{
+public class TenantServiceImpl implements TenantService
+{
 	
 	@Autowired
 	public TenantRepository tenantRepository;
-
-	public void setTenantRepository(TenantRepository tenantRepository) {
+	
+	public void setTenantRepository( TenantRepository tenantRepository )
+	{
 		this.tenantRepository = tenantRepository;
 	}
-
+	
 	@Override
-	public ArrayList<Tenant> findAll() {
+	public ArrayList<Tenant> findAll()
+	{
 		return (ArrayList<Tenant>) tenantRepository.findAll();
 	}
-
+	
 	@Override
-	public Optional<Tenant> findById( UUID tenantId ) {
-		return tenantRepository.findById(tenantId);
+	public Optional<Tenant> findById( UUID tenantId )
+	{
+		return tenantRepository.findById( tenantId );
 	}
 	
 }

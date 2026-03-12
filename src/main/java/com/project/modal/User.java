@@ -1,3 +1,4 @@
+
 package com.project.modal;
 
 import java.time.Instant;
@@ -21,35 +22,39 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name = "users", uniqueConstraints = { @UniqueConstraint(columnNames = { "tenant_id", "email" }) })
+@Table( name = "users", uniqueConstraints =
+{ @UniqueConstraint( columnNames =
+{ "tenant_id", "email" } ) } )
 @Getter
 @Setter
 @NoArgsConstructor
-@EqualsAndHashCode(callSuper = true)
-public class User extends CreateAudit {
-
+@EqualsAndHashCode( callSuper = true )
+public class User extends CreateAudit
+{
+	
 	@Id
-	@GeneratedValue(strategy = GenerationType.UUID)
-	@Column(name = "id", updatable = false, nullable = false)
+	@GeneratedValue( strategy = GenerationType.UUID )
+	@Column( name = "id", updatable = false, nullable = false )
 	private UUID id;
 	
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "tenant_id", nullable = false)
+	@ManyToOne( fetch = FetchType.LAZY )
+	@JoinColumn( name = "tenant_id", nullable = false )
 	private Tenant tenant;
 	
-	@Column(name = "email", nullable = false)
+	@Column( name = "email", nullable = false )
 	private String email;
 	
-	@Column(name ="name")
+	@Column( name = "name" )
 	private String name;
-
-	@Column(name ="active")
+	
+	@Column( name = "active" )
 	private boolean status = true;
 	
-	@Column(name = "deleted_at", updatable = false)
+	@Column( name = "deleted_at", updatable = false )
 	private Instant deleteAt;
 	
-	public User(UUID id, Tenant tenant, String email, String name, boolean status, Instant deleteAt) {
+	public User( UUID id, Tenant tenant, String email, String name, boolean status, Instant deleteAt )
+	{
 		super();
 		this.id = id;
 		this.tenant = tenant;
@@ -57,5 +62,6 @@ public class User extends CreateAudit {
 		this.name = name;
 		this.status = status;
 		this.deleteAt = deleteAt;
-	}	
+	}
+	
 }

@@ -1,3 +1,4 @@
+
 package com.project.dto;
 
 import java.time.LocalDateTime;
@@ -9,12 +10,13 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class ErrorResponse {
-
+public class ErrorResponse
+{
+	
 	private LocalDateTime timeStamp;
 	private int status;
 	private String error;
 	private String message;
 	private String path;
-
+	
 }

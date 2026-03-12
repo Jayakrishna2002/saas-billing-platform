@@ -1,3 +1,4 @@
+
 package com.project;
 
 import org.springframework.boot.SpringApplication;
@@ -6,10 +7,12 @@ import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 
 @SpringBootApplication
 @EnableJpaAuditing
-public class SaasApplication {
-
-	public static void main(String[] args) {
-		SpringApplication.run(SaasApplication.class, args);
+public class SaasApplication
+{
+	
+	public static void main( String[] args )
+	{
+		SpringApplication.run( SaasApplication.class, args );
 	}
-
+	
 }

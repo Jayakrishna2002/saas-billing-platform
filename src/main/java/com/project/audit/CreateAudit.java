@@ -1,3 +1,4 @@
+
 package com.project.audit;
 
 import java.time.Instant;
@@ -13,14 +14,16 @@ import lombok.Data;
 
 @Data
 @MappedSuperclass
-@EntityListeners(AuditingEntityListener.class)
-public class CreateAudit {
+@EntityListeners( AuditingEntityListener.class )
+public class CreateAudit
+{
 	
 	@CreatedDate
-	@Column(name = "created_at", updatable = false)
+	@Column( name = "created_at", updatable = false )
 	private Instant createdAt;
 	
 	@Version
-	@Column(name = "version")
+	@Column( name = "version" )
 	private Long version;
+	
 }

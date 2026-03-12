@@ -1,3 +1,4 @@
+
 package com.project.service;
 
 import java.util.Optional;
@@ -9,7 +10,8 @@ import org.springframework.data.domain.Pageable;
 import com.project.dto.CreateUserRequest;
 import com.project.dto.UserResponse;
 
-public interface UserService {
+public interface UserService
+{
 	
 	public UserResponse createUser( UUID tenantId, CreateUserRequest request );
 	
@@ -17,7 +19,8 @@ public interface UserService {
 	
 	public Optional<UserResponse> findUserByIdAndTenantId( UUID userId, UUID tenantId );
 	
-	public boolean existsByEmailAndTenantId(String email, UUID tenantId);
+	public boolean existsByEmailAndTenantId( String email, UUID tenantId );
 	
 	public UserResponse deleteUser( UUID userId, UUID tenantId );
+	
 }

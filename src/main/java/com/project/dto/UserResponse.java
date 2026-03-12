@@ -1,3 +1,4 @@
+
 package com.project.dto;
 
 import java.time.Instant;
@@ -10,7 +11,8 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class UserResponse {
+public class UserResponse
+{
 	
 	private UUID tenantId;
 	private String email;

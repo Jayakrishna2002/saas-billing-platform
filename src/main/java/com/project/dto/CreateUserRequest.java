@@ -1,3 +1,4 @@
+
 package com.project.dto;
 
 import jakarta.validation.constraints.Email;
@@ -5,12 +6,14 @@ import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 
 @Data
-public class CreateUserRequest {
+public class CreateUserRequest
+{
 	
-	@NotBlank	
+	@NotBlank
 	private String name;
-
-	@NotBlank @Email
+	
+	@NotBlank
+	@Email
 	private String email;
 	
 }

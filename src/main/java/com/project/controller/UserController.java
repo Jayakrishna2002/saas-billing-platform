@@ -1,3 +1,4 @@
+
 package com.project.controller;
 
 import java.util.UUID;
@@ -25,42 +26,49 @@ import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 
 @RestController
-@RequestMapping("/users")
+@RequestMapping( "/users" )
 @Slf4j
-public class UserController {
+public class UserController
+{
 	
 	private final UserService userService;
 	
-	public UserController(UserService userService) {
-        this.userService = userService;
-    }
+	public UserController( UserService userService )
+	{
+		this.userService = userService;
+	}
 	
 	@PostMapping
-	public ResponseEntity<UserResponse> createUser(@RequestHeader("X-Tenant-ID") UUID tenantId,
-			@Valid @RequestBody CreateUserRequest request) {
+	public ResponseEntity<UserResponse> createUser(
+			@RequestHeader( "X-Tenant-ID" ) UUID tenantId, @Valid @RequestBody CreateUserRequest request
+	)
+	{
 		
-		log.debug("DEBUG: Tenant ID is " + tenantId);
-		return ResponseEntity.status(HttpStatus.CREATED).body((userService.createUser(tenantId, request)));
+		log.debug( "DEBUG: Tenant ID is " + tenantId );
+		return ResponseEntity.status( HttpStatus.CREATED ).body( ( userService.createUser( tenantId, request ) ) );
 	}
 	
 	@GetMapping
-	public ResponseEntity<Page<UserResponse>> getAllUsers(@RequestHeader("X-Tenant-ID") UUID tenantId,
-			@PageableDefault(size = 20, sort = "createdAt", direction = Direction.DESC) Pageable pageable) {
-
-		log.debug("DEBUG: Tenant ID is " + tenantId);
-		Page<UserResponse> userRes = userService.findAllUsersByTenantId(tenantId, pageable);
-		return ResponseEntity.status(HttpStatus.FOUND).body(userRes);
+	public ResponseEntity<Page<UserResponse>> getAllUsers(
+			@RequestHeader( "X-Tenant-ID" ) UUID tenantId,
+			@PageableDefault( size = 20, sort = "createdAt", direction = Direction.DESC ) Pageable pageable
+	)
+	{
+		
+		log.debug( "DEBUG: Tenant ID is " + tenantId );
+		Page<UserResponse> userRes = userService.findAllUsersByTenantId( tenantId, pageable );
+		return ResponseEntity.status( HttpStatus.FOUND ).body( userRes );
 	}
 	
-	@DeleteMapping("/{userId}")
-	public ResponseEntity<?> removeUser(@RequestHeader("X-Tenant-ID") UUID tenantId,
-			@PathVariable UUID userId) {
-
-		log.debug("DEBUG: Tenant ID is " + tenantId);
-		log.debug("DEBUG: User ID is " + userId);
+	@DeleteMapping( "/{userId}" )
+	public ResponseEntity<?> removeUser( @RequestHeader( "X-Tenant-ID" ) UUID tenantId, @PathVariable UUID userId )
+	{
 		
-		UserResponse userRes = userService.deleteUser(userId, tenantId);
-		return ResponseEntity.status(HttpStatus.NO_CONTENT).body(userRes);
+		log.debug( "DEBUG: Tenant ID is " + tenantId );
+		log.debug( "DEBUG: User ID is " + userId );
+		
+		UserResponse userRes = userService.deleteUser( userId, tenantId );
+		return ResponseEntity.status( HttpStatus.NO_CONTENT ).body( userRes );
 	}
 	
 }
