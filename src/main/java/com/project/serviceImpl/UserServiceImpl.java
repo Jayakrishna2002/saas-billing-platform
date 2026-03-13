@@ -2,11 +2,9 @@
 package com.project.serviceImpl;
 
 import java.time.Instant;
-import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -15,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.project.dto.CreateUserRequest;
 import com.project.dto.UserResponse;
 import com.project.exception.conflict.DuplicateUserException;
+import com.project.exception.notFound.NotFoundException;
 import com.project.exception.notFound.TenantNotFoundException;
 import com.project.exception.notFound.UserNotFoundException;
 import com.project.modal.Tenant;
@@ -88,7 +87,7 @@ public class UserServiceImpl implements UserService
 	}
 	
 	@Override
-	public Optional<UserResponse> findUserByIdAndTenantId( UUID userId, UUID tenantId )
+	public UserResponse findUserByIdAndTenantId( UUID userId, UUID tenantId )
 	{
 		
 		if ( tenantId == null || userId == null )
@@ -96,7 +95,14 @@ public class UserServiceImpl implements UserService
 			throw new IllegalArgumentException( "Tenant ID or User Id must not be null" );
 		}
 		
-		return userRepository.findByIdAndTenant_IdAndStatus( userId, tenantId, true ).map( this::mapToResponse );
+		User user = userRepository.findByIdAndTenant_IdAndStatus( userId, tenantId, true )
+				.orElseThrow( () -> new UserNotFoundException( "User Not Found for the userId: " + userId ) );
+		
+		UserResponse userRes = new UserResponse(
+				user.getTenant().getId(), user.getEmail(), user.getName(), user.isStatus(), user.getCreatedAt()
+		);
+		
+		return userRes; 
 	}
 	
 	private UserResponse mapToResponse( User user )
@@ -140,6 +146,20 @@ public class UserServiceImpl implements UserService
 		}
 		
 		return false;
+	}
+
+	@Override
+	public UserResponse updateUserByIdAndTenantId( UUID userId, UUID tenantId, CreateUserRequest request )
+	{
+
+		User user = userRepository.findByIdAndTenant_IdAndStatus( userId, tenantId, true )
+				.orElseThrow( () -> new UserNotFoundException( "User Not Found for the userId: " + userId ) );
+		
+		// Updating user object
+		user.setName( request.getName() );
+		userRepository.save( user );
+		
+		return mapToResponse( user );
 	}
 	
 }

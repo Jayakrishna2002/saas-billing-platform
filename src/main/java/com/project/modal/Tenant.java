@@ -4,7 +4,7 @@ package com.project.modal;
 import java.time.Instant;
 import java.util.UUID;
 
-import com.project.audit.CreateAudit;
+import com.project.audit.Audit;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -23,7 +23,7 @@ import lombok.Setter;
 @Getter
 @NoArgsConstructor
 @EqualsAndHashCode( callSuper = true )
-public class Tenant extends CreateAudit
+public class Tenant extends Audit
 {
 	
 	@Id

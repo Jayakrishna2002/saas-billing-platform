@@ -1,6 +1,7 @@
 
 package com.project.controller;
 
+import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.data.domain.Page;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -26,7 +28,7 @@ import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 
 @RestController
-@RequestMapping( "/users" )
+@RequestMapping( "/api/v1/users" )
 @Slf4j
 public class UserController
 {
@@ -58,6 +60,31 @@ public class UserController
 		log.debug( "DEBUG: Tenant ID is " + tenantId );
 		Page<UserResponse> userRes = userService.findAllUsersByTenantId( tenantId, pageable );
 		return ResponseEntity.status( HttpStatus.FOUND ).body( userRes );
+	}
+	
+	@GetMapping( "/{userId}" )
+	public ResponseEntity<UserResponse> getUser(
+			@RequestHeader( "X-Tenant-ID" ) UUID tenantId, @PathVariable UUID userId
+	)
+	{
+		log.debug( "DEBUG: User ID is " + userId );
+		
+		UserResponse userResponse = userService.findUserByIdAndTenantId( userId, tenantId );
+		
+		return ResponseEntity.status( HttpStatus.FOUND ).body( userResponse );
+	}
+	
+	@PutMapping( "/{userId}" )
+	public ResponseEntity<UserResponse> updateUser(
+			@RequestHeader( "X-Tenant-ID" ) UUID tenantId, @PathVariable UUID userId,
+			@RequestBody CreateUserRequest request
+	)
+	{
+		log.debug( "DEBUG: User ID is " + userId );
+		
+		UserResponse userResponse = userService.updateUserByIdAndTenantId( userId, tenantId, request );
+		
+		return ResponseEntity.status( HttpStatus.OK ).body( userResponse );
 	}
 	
 	@DeleteMapping( "/{userId}" )
