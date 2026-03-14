@@ -1,7 +1,6 @@
 
 package com.project.controller;
 
-import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.data.domain.Page;
@@ -20,7 +19,7 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.project.dto.CreateUserRequest;
+import com.project.dto.UserRequest;
 import com.project.dto.UserResponse;
 import com.project.service.UserService;
 
@@ -42,7 +41,7 @@ public class UserController
 	
 	@PostMapping
 	public ResponseEntity<UserResponse> createUser(
-			@RequestHeader( "X-Tenant-ID" ) UUID tenantId, @Valid @RequestBody CreateUserRequest request
+			@RequestHeader( "X-Tenant-ID" ) UUID tenantId, @Valid @RequestBody UserRequest request
 	)
 	{
 		
@@ -77,7 +76,7 @@ public class UserController
 	@PutMapping( "/{userId}" )
 	public ResponseEntity<UserResponse> updateUser(
 			@RequestHeader( "X-Tenant-ID" ) UUID tenantId, @PathVariable UUID userId,
-			@RequestBody CreateUserRequest request
+			@Valid @RequestBody UserRequest request
 	)
 	{
 		log.debug( "DEBUG: User ID is " + userId );

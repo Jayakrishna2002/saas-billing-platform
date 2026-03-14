@@ -13,11 +13,10 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class UserResponse
+public class TenantResponse
 {
 	
-	private UUID tenantId;
-	private String email;
+	private UUID id;
 	private String name;
 	private StatusType status;
 	private Instant createdAt;

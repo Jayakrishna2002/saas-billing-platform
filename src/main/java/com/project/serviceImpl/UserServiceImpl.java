@@ -10,10 +10,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.project.dto.CreateUserRequest;
+import com.project.dto.StatusType;
+import com.project.dto.UserRequest;
 import com.project.dto.UserResponse;
 import com.project.exception.conflict.DuplicateUserException;
-import com.project.exception.notFound.NotFoundException;
 import com.project.exception.notFound.TenantNotFoundException;
 import com.project.exception.notFound.UserNotFoundException;
 import com.project.modal.Tenant;
@@ -41,7 +41,7 @@ public class UserServiceImpl implements UserService
 	}
 	
 	@Override
-	public UserResponse createUser( UUID tenantId, CreateUserRequest request )
+	public UserResponse createUser( UUID tenantId, UserRequest request )
 	{
 		
 		if ( tenantId == null )
@@ -60,7 +60,7 @@ public class UserServiceImpl implements UserService
 		user.setName( request.getName() );
 		user.setStatus( true );
 		
-		boolean isEmailExist = userRepository.existsByEmailAndTenant_Id( user.getEmail(), tenantId );
+		boolean isEmailExist = userRepository.existsByEmailAndTenant_Id( user.getEmail(), tenantId, true );
 		log.error( "isEmailExist" + isEmailExist );
 		
 		log.error( "Email : " + user.getEmail() );
@@ -98,18 +98,14 @@ public class UserServiceImpl implements UserService
 		User user = userRepository.findByIdAndTenant_IdAndStatus( userId, tenantId, true )
 				.orElseThrow( () -> new UserNotFoundException( "User Not Found for the userId: " + userId ) );
 		
-		UserResponse userRes = new UserResponse(
-				user.getTenant().getId(), user.getEmail(), user.getName(), user.isStatus(), user.getCreatedAt()
-		);
-		
-		return userRes; 
+		return mapToResponse( user ); 
 	}
-	
+		
 	private UserResponse mapToResponse( User user )
 	{
-		return new UserResponse(
-				user.getTenant().getId(), user.getEmail(), user.getName(), user.isStatus(), user.getCreatedAt()
-		);
+		return UserResponse.builder().tenantId( user.getTenant().getId() ).email( user.getEmail() ).name( user.getName() )
+				.status( user.isStatus() ? StatusType.ACTIVE : StatusType.INACTIVE ).createdAt( user.getCreatedAt() )
+				.build();
 	}
 	
 	@Override
@@ -129,11 +125,7 @@ public class UserServiceImpl implements UserService
 		user.setDeleteAt( Instant.now() );
 		userRepository.save( user );
 		
-		UserResponse userRes = new UserResponse(
-				user.getTenant().getId(), user.getEmail(), user.getName(), user.isStatus(), user.getCreatedAt()
-		);
-		
-		return userRes;
+		return mapToResponse( user );
 	}
 	
 	@Override
@@ -142,14 +134,14 @@ public class UserServiceImpl implements UserService
 		
 		if ( tenantId != null )
 		{
-			return userRepository.existsByEmailAndTenant_Id( email, tenantId );
+			return userRepository.existsByEmailAndTenant_Id( email, tenantId, true );
 		}
 		
 		return false;
 	}
 
 	@Override
-	public UserResponse updateUserByIdAndTenantId( UUID userId, UUID tenantId, CreateUserRequest request )
+	public UserResponse updateUserByIdAndTenantId( UUID userId, UUID tenantId, UserRequest request )
 	{
 
 		User user = userRepository.findByIdAndTenant_IdAndStatus( userId, tenantId, true )

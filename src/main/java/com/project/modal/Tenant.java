@@ -12,16 +12,16 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Data;
 import lombok.EqualsAndHashCode;
-import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 @Entity
 @Table( name = "tenants" )
-@Setter
-@Getter
+@Data
 @NoArgsConstructor
+@AllArgsConstructor
 @EqualsAndHashCode( callSuper = true )
 public class Tenant extends Audit
 {
@@ -34,13 +34,10 @@ public class Tenant extends Audit
 	@Column( name = "name", nullable = false )
 	private String name;
 	
-	@Column( name = "created_at", updatable = false )
-	private Instant createdAt;
+	@Column( name = "status" )
+	private boolean status = true;
 	
-	public Tenant( UUID id, String name )
-	{
-		this.id = id;
-		this.name = name;
-	}
+	@Column( name = "delete_at" )
+	private Instant deleteAt;
 	
 }

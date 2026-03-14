@@ -1,17 +1,25 @@
 
 package com.project.service;
 
-import java.util.ArrayList;
-import java.util.Optional;
 import java.util.UUID;
 
-import com.project.modal.Tenant;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+
+import com.project.dto.TenantRequest;
+import com.project.dto.TenantResponse;
 
 public interface TenantService
 {
 	
-	public ArrayList<Tenant> findAll();
+	public Page<TenantResponse> findAll( Pageable pageable);
 	
-	public Optional<Tenant> findById( UUID tenantId );
+	public TenantResponse findById( UUID tenantId );
+	
+	public TenantResponse createTenant( TenantRequest request );
+
+	public TenantResponse updateTenant( UUID tenantId, TenantRequest request );
+
+	public void deleteTenant( UUID tenantId );
 	
 }
