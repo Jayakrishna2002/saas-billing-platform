@@ -15,8 +15,10 @@ import com.project.modal.Tenant;
 public interface TenantRepository extends JpaRepository<Tenant , UUID>
 {
 	
-	Optional<Tenant> findByIdAndStatus( UUID tenantId, boolean status );
+	public Optional<Tenant> findByIdAndStatus( UUID tenantId, boolean status );
 	
-	Page<Tenant> findByStatus( Pageable pageable, boolean status );
+	public Page<Tenant> findByStatus( Pageable pageable, boolean status );
+	
+	public boolean existsByNameIgnoreCase( String name );
 	
 }

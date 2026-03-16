@@ -12,12 +12,15 @@ import org.springframework.stereotype.Service;
 import com.project.dto.StatusType;
 import com.project.dto.TenantRequest;
 import com.project.dto.TenantResponse;
+import com.project.exception.conflict.DuplicateUserException;
 import com.project.exception.notFound.TenantNotFoundException;
 import com.project.modal.Tenant;
 import com.project.pagination.PageMapper;
 import com.project.pagination.PagedResponse;
 import com.project.repository.TenantRepository;
 import com.project.service.TenantService;
+
+import jakarta.transaction.Transactional;
 
 @Service
 public class TenantServiceImpl implements TenantService
@@ -34,8 +37,8 @@ public class TenantServiceImpl implements TenantService
 	@Override
 	public PagedResponse<TenantResponse> findAll( Pageable pageable )
 	{
-		 Page<TenantResponse> tenantResponse = tenantRepository.findByStatus( pageable, true ).map( this::mapToResponse );
-		 return PageMapper.map( tenantResponse );
+		Page<TenantResponse> tenantResponse = tenantRepository.findByStatus( pageable, true ).map( this::mapToResponse );
+		return PageMapper.map( tenantResponse );
 	}
 	
 	@Override
@@ -50,6 +53,17 @@ public class TenantServiceImpl implements TenantService
 	@Override
 	public TenantResponse createTenant( TenantRequest request )
 	{
+		
+		if ( request.getName() == null || request.getName().trim().isEmpty() )
+		{
+			throw new IllegalArgumentException( "Tenant Name should not empty." );
+		}
+		
+		if ( tenantRepository.existsByNameIgnoreCase( request.getName() ) )
+		{
+			throw new DuplicateUserException( "Tenant Name already exist, Please choose a different name." );
+		}
+		
 		Tenant tenant = new Tenant();
 		tenant.setName( request.getName() );
 		
@@ -67,8 +81,20 @@ public class TenantServiceImpl implements TenantService
 	@Override
 	public TenantResponse updateTenant( UUID tenantId, TenantRequest request )
 	{
+		
+		if ( request.getName() == null || request.getName().trim().isEmpty() )
+		{
+			throw new IllegalArgumentException( "Tenant Name should not empty." );
+		}
+		
 		Tenant tenant = tenantRepository.findById( tenantId )
 				.orElseThrow( () -> new TenantNotFoundException( "Tenant Not Found for the ID: " + tenantId ) );
+		
+		if ( !tenant.isStatus() )
+		{
+			throw new IllegalStateException("Cannot update an inactive tenant. Please reactivate the tenant first.");
+	    
+		}
 		
 		tenant.setName( request.getName() );
 		Tenant savedTenant = tenantRepository.save( tenant );
@@ -76,6 +102,7 @@ public class TenantServiceImpl implements TenantService
 	}
 	
 	@Override
+	@Transactional
 	public void deleteTenant( UUID tenantId )
 	{
 		Tenant tenant = tenantRepository.findById( tenantId )

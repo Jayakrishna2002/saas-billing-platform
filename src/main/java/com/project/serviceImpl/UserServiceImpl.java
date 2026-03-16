@@ -164,6 +164,12 @@ public class UserServiceImpl implements UserService
 		User user = userRepository.findByIdAndTenant_IdAndStatus( userId, tenantId, true )
 				.orElseThrow( () -> new UserNotFoundException( "User Not Found for the userId: " + userId ) );
 		
+		if ( !user.isStatus() )
+		{
+			throw new IllegalStateException("Cannot update an inactive user. Please reactivate the user first.");
+	    
+		}
+		
 		// Updating user object
 		user.setName( request.getName() );
 		userRepository.save( user );
