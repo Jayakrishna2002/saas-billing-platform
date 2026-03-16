@@ -3,6 +3,7 @@ package com.project.controller;
 
 import java.util.UUID;
 
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort.Direction;
@@ -21,6 +22,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.project.dto.UserRequest;
 import com.project.dto.UserResponse;
+import com.project.pagination.PagedResponse;
 import com.project.service.UserService;
 
 import jakarta.validation.Valid;
@@ -46,19 +48,19 @@ public class UserController
 	{
 		
 		log.debug( "DEBUG: Tenant ID is " + tenantId );
-		return ResponseEntity.status( HttpStatus.CREATED ).body( ( userService.createUser( tenantId, request ) ) );
+		return ResponseEntity.status( HttpStatus.CREATED ).body( ( userService.createUser( request ) ) );
 	}
 	
 	@GetMapping
-	public ResponseEntity<Page<UserResponse>> getAllUsers(
+	public ResponseEntity<PagedResponse<UserResponse>> getAllUsers(
 			@RequestHeader( "X-Tenant-ID" ) UUID tenantId,
-			@PageableDefault( size = 20, sort = "createdAt", direction = Direction.DESC ) Pageable pageable
+			@ParameterObject @PageableDefault( size = 20, sort = "createdAt", direction = Direction.DESC ) Pageable pageable
 	)
 	{
 		
 		log.debug( "DEBUG: Tenant ID is " + tenantId );
-		Page<UserResponse> userRes = userService.findAllUsersByTenantId( tenantId, pageable );
-		return ResponseEntity.status( HttpStatus.FOUND ).body( userRes );
+		PagedResponse<UserResponse> userRes = userService.findAllUsers( pageable );
+		return ResponseEntity.status( HttpStatus.OK ).body( userRes );
 	}
 	
 	@GetMapping( "/{userId}" )
@@ -68,9 +70,9 @@ public class UserController
 	{
 		log.debug( "DEBUG: User ID is " + userId );
 		
-		UserResponse userResponse = userService.findUserByIdAndTenantId( userId, tenantId );
+		UserResponse userResponse = userService.findUserById( userId );
 		
-		return ResponseEntity.status( HttpStatus.FOUND ).body( userResponse );
+		return ResponseEntity.status( HttpStatus.OK ).body( userResponse );
 	}
 	
 	@PutMapping( "/{userId}" )
@@ -81,7 +83,7 @@ public class UserController
 	{
 		log.debug( "DEBUG: User ID is " + userId );
 		
-		UserResponse userResponse = userService.updateUserByIdAndTenantId( userId, tenantId, request );
+		UserResponse userResponse = userService.updateUserById( userId, request );
 		
 		return ResponseEntity.status( HttpStatus.OK ).body( userResponse );
 	}
@@ -93,7 +95,7 @@ public class UserController
 		log.debug( "DEBUG: Tenant ID is " + tenantId );
 		log.debug( "DEBUG: User ID is " + userId );
 		
-		UserResponse userRes = userService.deleteUser( userId, tenantId );
+		UserResponse userRes = userService.deleteUser( userId );
 		return ResponseEntity.status( HttpStatus.NO_CONTENT ).body( userRes );
 	}
 	

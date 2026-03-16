@@ -8,11 +8,12 @@ import org.springframework.data.domain.Pageable;
 
 import com.project.dto.TenantRequest;
 import com.project.dto.TenantResponse;
+import com.project.pagination.PagedResponse;
 
 public interface TenantService
 {
 	
-	public Page<TenantResponse> findAll( Pageable pageable);
+	public PagedResponse<TenantResponse> findAll( Pageable pageable);
 	
 	public TenantResponse findById( UUID tenantId );
 	

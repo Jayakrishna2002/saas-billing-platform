@@ -14,6 +14,8 @@ import com.project.dto.TenantRequest;
 import com.project.dto.TenantResponse;
 import com.project.exception.notFound.TenantNotFoundException;
 import com.project.modal.Tenant;
+import com.project.pagination.PageMapper;
+import com.project.pagination.PagedResponse;
 import com.project.repository.TenantRepository;
 import com.project.service.TenantService;
 
@@ -30,9 +32,10 @@ public class TenantServiceImpl implements TenantService
 	}
 	
 	@Override
-	public Page<TenantResponse> findAll( Pageable pageable )
+	public PagedResponse<TenantResponse> findAll( Pageable pageable )
 	{
-		return tenantRepository.findByStatus( pageable, true ).map( this::mapToResponse );
+		 Page<TenantResponse> tenantResponse = tenantRepository.findByStatus( pageable, true ).map( this::mapToResponse );
+		 return PageMapper.map( tenantResponse );
 	}
 	
 	@Override

@@ -8,20 +8,21 @@ import org.springframework.data.domain.Pageable;
 
 import com.project.dto.UserRequest;
 import com.project.dto.UserResponse;
+import com.project.pagination.PagedResponse;
 
 public interface UserService
 {
 	
-	public UserResponse createUser( UUID tenantId, UserRequest request );
+	public UserResponse createUser( UserRequest request );
 	
-	public Page<UserResponse> findAllUsersByTenantId( UUID tenantId, Pageable pageable );
+	public PagedResponse<UserResponse> findAllUsers( Pageable pageable );
 	
-	public UserResponse findUserByIdAndTenantId( UUID userId, UUID tenantId );
+	public UserResponse findUserById( UUID tenantId );
 	
-	public boolean existsByEmailAndTenantId( String email, UUID tenantId );
+	public boolean existsByEmail( String email );
 	
-	public UserResponse deleteUser( UUID userId, UUID tenantId );
+	public UserResponse deleteUser( UUID userId );
 
-	public UserResponse updateUserByIdAndTenantId( UUID userId, UUID tenantId, UserRequest request );
+	public UserResponse updateUserById( UUID userId, UserRequest request );
 	
 }

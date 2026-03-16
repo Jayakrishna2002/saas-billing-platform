@@ -3,6 +3,7 @@ package com.project.controller;
 
 import java.util.UUID;
 
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort.Direction;
@@ -20,6 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.project.dto.TenantRequest;
 import com.project.dto.TenantResponse;
+import com.project.pagination.PagedResponse;
 import com.project.service.TenantService;
 
 import jakarta.validation.Valid;
@@ -42,17 +44,17 @@ public class TenantController
 	}
 	
 	@GetMapping
-	public ResponseEntity<Page<TenantResponse>> getAll(
-			@PageableDefault( size = 10, sort = "name", direction = Direction.ASC ) Pageable pageable
+	public ResponseEntity<PagedResponse<TenantResponse>> getAll(
+			@ParameterObject @PageableDefault( size = 10, sort = "name", direction = Direction.ASC ) Pageable pageable
 	)
 	{
-		return ResponseEntity.status( HttpStatus.FOUND ).body( tenantService.findAll( pageable ) );
+		return ResponseEntity.status( HttpStatus.OK ).body( tenantService.findAll( pageable ) );
 	}
 	
 	@GetMapping( "/{tenantId}" )
 	public ResponseEntity<TenantResponse> getTenant( @PathVariable UUID tenantId )
 	{
-		return ResponseEntity.status( HttpStatus.FOUND ).body( tenantService.findById( tenantId ) );
+		return ResponseEntity.status( HttpStatus.OK ).body( tenantService.findById( tenantId ) );
 	}
 	
 	@PutMapping( "/{tenantId}" )
