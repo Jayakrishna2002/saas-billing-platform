@@ -9,9 +9,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import com.project.dto.StatusType;
 import com.project.dto.TenantRequest;
 import com.project.dto.TenantResponse;
+import com.project.enums.StatusType;
 import com.project.exception.conflict.DuplicateUserException;
 import com.project.exception.notFound.TenantNotFoundException;
 import com.project.modal.Tenant;

@@ -34,33 +34,31 @@ public class User extends Audit
 	
 	@Id
 	@GeneratedValue( strategy = GenerationType.UUID )
-	@Column( name = "id", updatable = false, nullable = false )
+	@Column( updatable = false, nullable = false )
 	private UUID id;
 	
-	@ManyToOne( fetch = FetchType.LAZY )
-	@JoinColumn( name = "tenant_id", nullable = false )
-	private Tenant tenant;
+//	@ManyToOne( fetch = FetchType.LAZY )
+//	@JoinColumn( name = "tenant_id", nullable = false )
+//	private Tenant tenant;
 	
-	@Column( name = "email", nullable = false )
+	@Column( nullable = false )
 	private String email;
 	
-	@Column( name = "name" )
 	private String name;
 	
 	@Column( name = "active" )
-	private boolean status = true;
+	private boolean active = true;
 	
-	@Column( name = "deleted_at", updatable = false )
 	private Instant deleteAt;
 	
-	public User( UUID id, Tenant tenant, String email, String name, boolean status, Instant deleteAt )
+	public User( UUID id, String email, String name, boolean active, Instant deleteAt )
 	{
 		super();
 		this.id = id;
-		this.tenant = tenant;
+//		this.tenant = tenant;
 		this.email = email;
 		this.name = name;
-		this.status = status;
+		this.active = active;
 		this.deleteAt = deleteAt;
 	}
 	

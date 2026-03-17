@@ -4,6 +4,8 @@ package com.project.dto;
 import java.time.Instant;
 import java.util.UUID;
 
+import com.project.enums.StatusType;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

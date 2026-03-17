@@ -10,19 +10,23 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.project.dto.StatusType;
 import com.project.dto.UserRequest;
 import com.project.dto.UserResponse;
+import com.project.enums.Role;
+import com.project.enums.StatusType;
 import com.project.exception.conflict.DuplicateUserException;
 import com.project.exception.notFound.TenantNotFoundException;
 import com.project.exception.notFound.UserNotFoundException;
 import com.project.infrastructure.tenant.TenantContextHolder;
 import com.project.modal.Tenant;
+import com.project.modal.TenantMembership;
 import com.project.modal.User;
 import com.project.pagination.PageMapper;
 import com.project.pagination.PagedResponse;
+import com.project.repository.TenantMembershipRepository;
 import com.project.repository.TenantRepository;
 import com.project.repository.UserRepository;
+import com.project.service.TenantMembershipService;
 import com.project.service.UserService;
 
 import lombok.extern.slf4j.Slf4j;
@@ -36,11 +40,14 @@ public class UserServiceImpl implements UserService
 	public UserRepository userRepository;
 	@Autowired
 	public TenantRepository tenantRepository;
+	@Autowired
+	public TenantMembershipRepository membershipRepository;
 	
-	public UserServiceImpl( UserRepository userRepository, TenantRepository tenantRepository )
+	public UserServiceImpl(	UserRepository userRepository, TenantRepository tenantRepository,	TenantMembershipRepository membershipRepository	)
 	{
 		this.userRepository = userRepository;
 		this.tenantRepository = tenantRepository;
+		this.membershipRepository = membershipRepository;
 	}
 	
 	@Override
@@ -60,12 +67,11 @@ public class UserServiceImpl implements UserService
 		String emailLower = request.getEmail().toLowerCase().trim();
 		
 		User user = new User();
-		user.setTenant( tenant );
 		user.setEmail( emailLower );
 		user.setName( request.getName() );
-		user.setStatus( true );
+		user.setActive( true );
 		
-		boolean isEmailExist = userRepository.existsByEmailAndTenant_IdAndStatus( user.getEmail(), tenantId, true );
+		boolean isEmailExist = userRepository.existsByTenantIdAndUserId( user.getEmail(), tenantId );
 		log.error( "isEmailExist" + isEmailExist );
 		
 		log.error( "Email : " + user.getEmail() );
@@ -76,7 +82,16 @@ public class UserServiceImpl implements UserService
 		}
 		
 		User savedUser = userRepository.save( user );
-		return mapToResponse( savedUser );
+		
+		TenantMembership membership = new TenantMembership();
+		membership.setTenant( tenant );
+		membership.setUser( savedUser );
+		membership.setRole( Role.ADMIN );
+		membershipRepository.save( membership );
+		
+		return UserResponse.builder().id( user.getId() ).email( user.getEmail() ).name( user.getName() ).role( membership.getRole() )
+				.status( user.isActive() ? StatusType.ACTIVE : StatusType.INACTIVE ).createdAt( user.getCreatedAt() )
+				.build();
 	}
 	
 	@Override
@@ -89,7 +104,8 @@ public class UserServiceImpl implements UserService
 			throw new IllegalArgumentException( "Tenant ID must not be null" );
 		}
 		
-		Page<UserResponse> userResponse = userRepository.findByTenant_IdAndStatus( tenantId, pageable, true ).map( this::mapToResponse );
+		Page<UserResponse> userResponse = userRepository.findUsersByTenant( tenantId, pageable )
+				.map( this::mapToResponse );
 		
 		return PageMapper.map( userResponse );
 	}
@@ -104,7 +120,7 @@ public class UserServiceImpl implements UserService
 			throw new IllegalArgumentException( "Tenant ID or User Id must not be null" );
 		}
 		
-		User user = userRepository.findByIdAndTenant_IdAndStatus( userId, tenantId, true )
+		User user = userRepository.findUserById( userId, tenantId )
 				.orElseThrow( () -> new UserNotFoundException( "User Not Found for the userId: " + userId ) );
 		
 		return mapToResponse( user );
@@ -112,8 +128,8 @@ public class UserServiceImpl implements UserService
 	
 	private UserResponse mapToResponse( User user )
 	{
-		return UserResponse.builder().tenantId( user.getTenant().getId() ).email( user.getEmail() ).name( user.getName() )
-				.status( user.isStatus() ? StatusType.ACTIVE : StatusType.INACTIVE ).createdAt( user.getCreatedAt() )
+		return UserResponse.builder().id( user.getId() ).email( user.getEmail() ).name( user.getName() )
+				.status( user.isActive() ? StatusType.ACTIVE : StatusType.INACTIVE ).createdAt( user.getCreatedAt() )
 				.build();
 	}
 	
@@ -128,10 +144,10 @@ public class UserServiceImpl implements UserService
 			throw new IllegalArgumentException( "Tenant ID or User Id must not be null" );
 		}
 		
-		User user = userRepository.findByIdAndTenant_IdAndStatus( userId, tenantId, true )
+		User user = userRepository.findUserById( userId, tenantId )
 				.orElseThrow( () -> new UserNotFoundException( "User Not Found" ) );
 		
-		user.setStatus( false );
+		user.setActive( false );
 		user.setDeleteAt( Instant.now() );
 		userRepository.save( user );
 		
@@ -145,7 +161,7 @@ public class UserServiceImpl implements UserService
 		
 		if ( tenantId != null )
 		{
-			return userRepository.existsByEmailAndTenant_IdAndStatus( email, tenantId, true );
+			return userRepository.existsByTenantIdAndUserId( email, tenantId );
 		}
 		
 		return false;
@@ -161,13 +177,13 @@ public class UserServiceImpl implements UserService
 			throw new IllegalArgumentException( "Tenant ID or User Id must not be null" );
 		}
 		
-		User user = userRepository.findByIdAndTenant_IdAndStatus( userId, tenantId, true )
+		User user = userRepository.findUserById( userId, tenantId )
 				.orElseThrow( () -> new UserNotFoundException( "User Not Found for the userId: " + userId ) );
 		
-		if ( !user.isStatus() )
+		if ( !user.isActive() )
 		{
-			throw new IllegalStateException("Cannot update an inactive user. Please reactivate the user first.");
-	    
+			throw new IllegalStateException( "Cannot update an inactive user. Please reactivate the user first." );
+			
 		}
 		
 		// Updating user object

@@ -1,5 +1,5 @@
 
-package com.project.dto;
+package com.project.enums;
 
 public enum StatusType
 {
