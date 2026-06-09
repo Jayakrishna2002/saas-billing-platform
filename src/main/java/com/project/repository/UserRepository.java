@@ -30,8 +30,9 @@ public interface UserRepository extends JpaRepository<User , UUID>
 	@Query("""
 			SELECT u
 				FROM User u
-			JOIN TenantMembership tm ON tm.user.id = :userId
-			WHERE tm.tenant.id = :tenantId
+			JOIN TenantMembership tm ON tm.user.id = u.id
+			WHERE u.id = :userId
+			  AND	tm.tenant.id = :tenantId
 			  AND u.active = true
 			  AND tm.status = true
 			""")

@@ -188,6 +188,7 @@ public class UserServiceImpl implements UserService
 		
 		// Updating user object
 		user.setName( request.getName() );
+		user.setEmail( request.getEmail() );
 		userRepository.save( user );
 		
 		return mapToResponse( user );
