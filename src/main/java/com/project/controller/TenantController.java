@@ -19,9 +19,14 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.project.dto.TenantMembershipResponse;
 import com.project.dto.TenantRequest;
 import com.project.dto.TenantResponse;
+import com.project.dto.UserResponse;
+import com.project.enums.Role;
+import com.project.modal.TenantMembership;
 import com.project.pagination.PagedResponse;
+import com.project.service.TenantMembershipService;
 import com.project.service.TenantService;
 
 import jakarta.validation.Valid;
@@ -36,6 +41,7 @@ public class TenantController
 {
 	
 	private TenantService tenantService;
+	private TenantMembershipService membershipService;
 	
 	@PostMapping
 	public ResponseEntity<TenantResponse> createTenant( @Valid @RequestBody TenantRequest request )
@@ -55,6 +61,15 @@ public class TenantController
 	public ResponseEntity<TenantResponse> getTenant( @PathVariable UUID tenantId )
 	{
 		return ResponseEntity.status( HttpStatus.OK ).body( tenantService.findById( tenantId ) );
+	}
+	
+	@GetMapping( "/{tenantId}/members" )
+	public ResponseEntity<PagedResponse<TenantMembershipResponse>> getMemberForTenant(
+			@PathVariable UUID tenantId,
+			@ParameterObject @PageableDefault( size = 10, sort = "name", direction = Direction.ASC ) Pageable pageable
+	)
+	{
+		return ResponseEntity.status( HttpStatus.OK ).body( membershipService.findUsersByRoleAndTenantId( tenantId, Role.MEMBER, pageable ) );
 	}
 	
 	@PutMapping( "/{tenantId}" )

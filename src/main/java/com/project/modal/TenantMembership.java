@@ -1,6 +1,7 @@
 
 package com.project.modal;
 
+import java.time.Instant;
 import java.util.UUID;
 
 import com.project.audit.Audit;
@@ -47,5 +48,7 @@ public class TenantMembership extends Audit
 	private Role role;
 	
 	private boolean status = true;
+	
+	private Instant deleteAt;
 	
 }
