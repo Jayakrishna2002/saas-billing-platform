@@ -1,82 +1,219 @@
-**SaaS Billing Platform (WIP)**
+# SaaS Billing Platform
 
-A multi-tenant SaaS backend platform built using Spring Boot 3 and Java 21.
+A production-oriented multi-tenant SaaS backend built using Spring Boot. This project focuses on scalable architecture, tenant isolation, security, and enterprise backend development practices.
 
-This project simulates a production-grade SaaS system with strict tenant isolation, clean architecture layering, and scalability considerations.
+---
 
-**🚀 Tech Stack**
+# Tech Stack
 
 * Java 21
-* Spring Boot 3
+* Spring Boot
 * Spring Data JPA
+* Hibernate
 * PostgreSQL
 * Maven
-* REST APIs
-* Multi-Tenant (Shared Schema Model)
+* OpenAPI / Swagger
 
-**🏗️ Architecture Overview**
+## Planned
 
-Current implementation follows layered architecture:
+* Spring Security
+* JWT Authentication
+* Redis
+* Docker
+* AWS EC2
+* Spring Cloud Gateway
+* OpenFeign
+* Apache Kafka
 
-` Controller → Service → Repository → Database `
+---
 
-Multi-Tenancy Strategy
+# Features
 
-Model: Shared Database + Shared Schema
+## Multi-Tenant Architecture
 
-* Each table includes a tenant_id
-* All queries are tenant-scoped
-* Composite unique constraint ensures isolation
+* Shared database, shared schema
+* Tenant isolation using `tenant_id`
+* Tenant-aware repository queries
+
+---
+
+## User Management
+
+* Create User
+* Update User
+* Retrieve Users (Pagination)
+* Soft Delete
+* Email normalization
+* DTO validation
+
+---
+
+## Tenant Management
+
+* Create Tenant
+* Retrieve Tenant
+* List Tenants
+
+---
+
+## Tenant Membership
+
+Supports many-to-many relationship between Users and Tenants.
+
+Features:
+
+* Automatic membership creation
+* Role assignment
+* Role updates
+* Membership soft delete
+* Last ADMIN validation
+
+Roles:
+
+* ADMIN
+* MEMBER
+
+Business Rules:
+
+* First user in a tenant becomes ADMIN.
+* Subsequent users become MEMBER.
+* The last ADMIN cannot be removed or demoted.
+
+---
+
+# Exception Handling
+
+Custom exception hierarchy:
+
+* BaseApplicationException
+* NotFoundException
+* UserNotFoundException
+* TenantNotFoundException
+* TenantMembershipNotFound
+* LastAdminDeletionException
+
+Centralized exception handling using `@RestControllerAdvice`.
+
+---
+
+# Pagination
+
+Implemented using Spring Data `Pageable`.
 
 Example:
-` UNIQUE (tenant_id, email) `
 
-This prevents duplicate users within the same tenant while allowing identical emails across different tenants.
+GET `/users?page=0&size=10`
 
-**🔐 Tenant Isolation Strategy**
+---
 
-* Tenant ID is passed via HTTP header: 
-` X-Tenant-ID: <UUID> `
-* Service layer enforces tenant presence
-* Repository queries are scoped using tenant_id
-* Database constraint enforces data integrity
+# Soft Delete
 
-Current limitation:
-Tenant header is trusted without authentication. Future iteration will introduce JWT-based tenant verification.
+Entities are logically deleted instead of being removed from the database.
 
-**📦 Domain Model**
-Users Table
+Benefits:
 
-* id (UUID, PK)
-* tenant_id (FK)
-* email
-* name
-* status
-* created_at
+* Auditability
+* Data recovery
+* Referential integrity
 
-Composite uniqueness:
-`(tenant_id, email)`
+---
 
-**⚠️ Concurrency Consideration**
+# Database Constraints
 
-Email uniqueness is enforced at the database level using a composite constraint.
+Implemented composite unique constraints to ensure data integrity.
 
-Service-level duplicate checks are considered advisory only and do not guarantee atomic enforcement under concurrent requests.
+Examples:
 
-**📈 Scalability Considerations (Planned)**
+* `(tenant_id, email)`
+* `(tenant_id, user_id)`
 
-* Pageable support for large tenant datasets
-* Proper indexing on (tenant_id, created_at)
-* Keyset pagination for high-volume tenants
-* Request-level tenant context
-* Dockerization
-* Kubernetes deployment
-* Event-driven architecture (Kafka)
+---
 
-**🧠 Architectural Decisions**
+# Project Structure
 
-1. DTO layer separates API contract from persistence model
-2. Constructor injection preferred over field injection
-3. Fail-fast on null tenantId
-4. Database constraint guarantees uniqueness under concurrency
-5. Lazy-loading avoided in DTO mapping
+```
+controller/
+service/
+repository/
+dto/
+entity/
+exception/
+config/
+```
+
+---
+
+# Current Architecture
+
+```
+Client
+    │
+    ▼
+Controller
+    │
+    ▼
+Service
+    │
+    ▼
+Repository
+    │
+    ▼
+Database
+```
+
+---
+
+# Roadmap
+
+## Completed
+
+* Multi-tenancy
+* User Module
+* Tenant Module
+* Tenant Membership Module
+* Pagination
+* Soft Delete
+* Global Exception Handling
+* DTO Validation
+
+## In Progress
+
+* Spring Security
+* JWT Authentication
+
+## Planned
+
+* Redis Caching
+* Docker
+* AWS Deployment
+* Spring Cloud Gateway
+* OpenFeign
+* Kafka Integration
+* Microservices
+
+---
+
+# Learning Objectives
+
+This project demonstrates:
+
+* Multi-tenant SaaS architecture
+* REST API design
+* Database design
+* JPA and Hibernate
+* Exception handling
+* Pagination
+* Soft delete
+* Role-based access design
+* Enterprise backend development
+
+---
+
+# Future Improvements
+
+* JWT-based authentication
+* Redis caching
+* Docker containerization
+* AWS deployment
+* Event-driven architecture using Kafka
+* Microservice decomposition
