@@ -23,8 +23,8 @@ public interface TenantMembershipService
 	
 	public PagedResponse<TenantMembershipResponse> findUsersByRoleAndTenantId( UUID tenantId, Role role, Pageable pageable );
 
-	public TenantMembershipResponse updateMembershipRole( UUID membershipId, @Valid TenantMembershipRequest request );
+	public TenantMembershipResponse updateMembershipRole( UUID tenantId, UUID membershipId, @Valid TenantMembershipRequest request );
 
-	public void deleteMembership( UUID membershipId );
+	public void deleteMembership( UUID tenantId, UUID membershipId );
 	
 }

@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -31,19 +32,22 @@ public class TenantMembershipController
 	
 	@PutMapping( "/{membershipId}/role" )
 	public ResponseEntity<TenantMembershipResponse> updateMembership(
-			@PathVariable UUID membershipId, @Valid @RequestBody TenantMembershipRequest request
+			@RequestHeader( "X-Tenant-ID" ) UUID tenantId, @PathVariable UUID membershipId,
+			@Valid @RequestBody TenantMembershipRequest request
 	)
 	{
 		
-		TenantMembershipResponse membershipResponse = membershipService.updateMembershipRole( membershipId, request );
+		TenantMembershipResponse membershipResponse = membershipService.updateMembershipRole( tenantId, membershipId, request );
 		return ResponseEntity.status( HttpStatus.OK ).body( membershipResponse );
 		
 	}
 	
 	@DeleteMapping( "/{membershipId}" )
-	public ResponseEntity<?> deleteMembership( @PathVariable UUID membershipId )
+	public ResponseEntity<?> deleteMembership(
+			@RequestHeader( "X-Tenant-ID" ) UUID tenantId, @PathVariable UUID membershipId
+	)
 	{
-		membershipService.deleteMembership( membershipId );
+		membershipService.deleteMembership( tenantId, membershipId );
 		return ResponseEntity.noContent().build();
 	}
 	

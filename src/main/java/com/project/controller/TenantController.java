@@ -66,7 +66,7 @@ public class TenantController
 	@GetMapping( "/{tenantId}/members" )
 	public ResponseEntity<PagedResponse<TenantMembershipResponse>> getMemberForTenant(
 			@PathVariable UUID tenantId,
-			@ParameterObject @PageableDefault( size = 10, sort = "name", direction = Direction.ASC ) Pageable pageable
+			@ParameterObject @PageableDefault( size = 10, sort = "user.name", direction = Direction.ASC ) Pageable pageable
 	)
 	{
 		return ResponseEntity.status( HttpStatus.OK ).body( membershipService.findUsersByRoleAndTenantId( tenantId, Role.MEMBER, pageable ) );

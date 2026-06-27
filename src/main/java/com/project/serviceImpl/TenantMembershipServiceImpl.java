@@ -69,7 +69,7 @@ public class TenantMembershipServiceImpl implements TenantMembershipService
 		}
 		
 		Page<TenantMembershipResponse> membership = tenantMembershipRepository
-				.findByTenant_IDAndRoleAndStatusTrue( tenantId, role, pageable ).map( this::mapToResponse );
+				.findByTenantIdAndRoleAndStatusTrue( tenantId, role, pageable ).map( this::mapToResponse );
 		
 		return PageMapper.map( membership );
 	}
@@ -82,9 +82,9 @@ public class TenantMembershipServiceImpl implements TenantMembershipService
 	}
 	
 	@Override
-	public TenantMembershipResponse updateMembershipRole( UUID membershipId, @Valid TenantMembershipRequest request )
+	public TenantMembershipResponse updateMembershipRole( UUID tenantId, UUID membershipId, @Valid TenantMembershipRequest request )
 	{
-		TenantMembership tenantMembership = tenantMembershipRepository.findById( membershipId )
+		TenantMembership tenantMembership = tenantMembershipRepository.findByIdAndTenant_Id( membershipId, tenantId )
 				.orElseThrow( () -> new TenantMembershipNotFound( "Membership Not Found for the ID: " + membershipId ) );
 		
 		if ( tenantMembership.getRole() == Role.ADMIN && request.getRole().equals( Role.MEMBER ) )
@@ -106,9 +106,9 @@ public class TenantMembershipServiceImpl implements TenantMembershipService
 	}
 	
 	@Override
-	public void deleteMembership( UUID membershipId )
+	public void deleteMembership( UUID tenantId, UUID membershipId )
 	{
-		TenantMembership membership = tenantMembershipRepository.findById( membershipId )
+		TenantMembership membership = tenantMembershipRepository.findByIdAndTenant_Id( membershipId, tenantId )
 				.orElseThrow( () -> new TenantMembershipNotFound( "Membership Not Found for the ID: " + membershipId ) );
 		
 		if ( membership.getRole().equals( Role.ADMIN ) )

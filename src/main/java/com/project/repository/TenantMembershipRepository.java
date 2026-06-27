@@ -24,7 +24,7 @@ public interface TenantMembershipRepository extends JpaRepository<TenantMembersh
 	
 	public boolean existsByTenant_Id (UUID tenantId );
 	
-	public Page<TenantMembership> findByTenant_IDAndRoleAndStatusTrue( UUID tenantId, Role role, Pageable pageable );
+	public Page<TenantMembership> findByTenantIdAndRoleAndStatusTrue( UUID tenantId, Role role, Pageable pageable );
 
 	@Query(""" 
 			SELECT COUNT(*) > 1
@@ -33,6 +33,8 @@ public interface TenantMembershipRepository extends JpaRepository<TenantMembersh
 			AND tm.role = :role
 			AND tm.status = true
 			""")
-	public boolean existsMoreThanOneAdminByTenantId( UUID id, Role role ); 
+	public boolean existsMoreThanOneAdminByTenantId( UUID id, Role role );
+
+	public Optional<TenantMembership> findByIdAndTenant_Id( UUID membershipId, UUID tenantId ); 
 	
 }

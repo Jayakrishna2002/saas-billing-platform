@@ -89,7 +89,7 @@ public class UserServiceImpl implements UserService
 		
 		membership.setTenant( tenant );
 		membership.setUser( savedUser );
-		membership.setRole( hasMembers ? Role.ADMIN : Role.MEMBER );
+		membership.setRole( hasMembers ? Role.MEMBER : Role.ADMIN );
 		membershipRepository.save( membership );
 		
 		return UserResponse.builder().id( user.getId() ).email( user.getEmail() ).name( user.getName() ).role( membership.getRole() )
