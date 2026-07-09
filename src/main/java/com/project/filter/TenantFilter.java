@@ -2,7 +2,6 @@
 package com.project.filter;
 
 import java.io.IOException;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.UUID;
 
@@ -15,6 +14,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import com.project.infrastructure.tenant.TenantContextHolder;
 import com.project.security.JwtTokenProvider;
+import com.project.service.CachedTenantResolverService;
 
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.FilterChain;
@@ -27,10 +27,12 @@ public class TenantFilter extends OncePerRequestFilter
 {
 	
 	private final JwtTokenProvider tokenProvider;
+	private final CachedTenantResolverService cachedService;
 	
-	public TenantFilter( JwtTokenProvider tokenProvider )
+	public TenantFilter( JwtTokenProvider tokenProvider, CachedTenantResolverService cachedService )
 	{
 		this.tokenProvider = tokenProvider;
+		this.cachedService = cachedService;
 	}
 	
 	@Override
@@ -65,10 +67,21 @@ public class TenantFilter extends OncePerRequestFilter
 				
 				try
 				{
+					
 					if ( tenantStr != null )
 					{
 						// 1. Hydrate our custom system multi-tenant isolation context
 						UUID tenantId = UUID.fromString( tenantStr );
+						
+						// Injecting and calling  CachedTenantResolver here
+						if ( !cachedService.isTenantActive( tenantId ) )
+						{
+							response.setStatus( HttpServletResponse.SC_BAD_REQUEST );
+							response.setContentType( "application/json" );
+							response.getWriter().write( "{\"error\": \"Tenant workspace is suspended or inactive\"}" );
+							return;
+						}
+						
 						TenantContextHolder.setTenantId( tenantId );
 						
 						UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
@@ -95,7 +108,8 @@ public class TenantFilter extends OncePerRequestFilter
 		
 		finally
 		{
-			// Always clean up ThreadLocal references post-execution to prevent container pool memory leaks
+			// Always clean up ThreadLocal references post-execution to prevent container
+			// pool memory leaks
 			TenantContextHolder.clear();
 		}
 		
