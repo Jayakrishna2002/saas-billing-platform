@@ -2,15 +2,21 @@
 package com.project.filter;
 
 import java.io.IOException;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.UUID;
 
-import org.apache.tomcat.util.file.Matcher;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import com.project.infrastructure.tenant.TenantContextHolder;
+import com.project.security.JwtTokenProvider;
 
+import io.jsonwebtoken.Claims;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -19,6 +25,13 @@ import jakarta.servlet.http.HttpServletResponse;
 @Component
 public class TenantFilter extends OncePerRequestFilter
 {
+	
+	private final JwtTokenProvider tokenProvider;
+	
+	public TenantFilter( JwtTokenProvider tokenProvider )
+	{
+		this.tokenProvider = tokenProvider;
+	}
 	
 	@Override
 	protected boolean shouldNotFilter( HttpServletRequest request ) throws ServletException
@@ -36,30 +49,56 @@ public class TenantFilter extends OncePerRequestFilter
 			throws ServletException, IOException
 	{
 		
-		String tenantId = request.getHeader( "X-Tenant-ID" );
+		String authHeader = request.getHeader( "Authorization" );
 		
-		if ( tenantId == null )
+		if ( authHeader != null && authHeader.startsWith( "Bearer " ) )
 		{
-			response.sendError( HttpServletResponse.SC_BAD_REQUEST, "Missing X-Tenant-ID header" );
-			return;
+			String token = authHeader.substring( 7 );
+			
+			if ( tokenProvider.validateToken( token ) )
+			{
+				Claims claims = tokenProvider.extractAllClaims( token );
+				
+				String tenantStr = claims.get( "tenantId", String.class );
+				String roleStr = claims.get( "role", String.class );
+				String email = claims.getSubject();
+				
+				try
+				{
+					if ( tenantStr != null )
+					{
+						// 1. Hydrate our custom system multi-tenant isolation context
+						UUID tenantId = UUID.fromString( tenantStr );
+						TenantContextHolder.setTenantId( tenantId );
+						
+						UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
+								email, null, Collections.singletonList( new SimpleGrantedAuthority( "ROLE_" + roleStr ) )
+						);
+						
+						SecurityContextHolder.getContext().setAuthentication( authentication );
+					}
+					
+				}
+				catch ( IllegalArgumentException e )
+				{
+					response.sendError( HttpServletResponse.SC_BAD_REQUEST, "Invalid Tenant ID format" );
+				}
+				
+			}
+			
 		}
 		
 		try
 		{
-			UUID id = UUID.fromString( tenantId );
-			TenantContextHolder.setTenantId( id );
-			
 			filterChain.doFilter( request, response );
-			
 		}
-		catch ( IllegalArgumentException e )
-		{
-			response.sendError( HttpServletResponse.SC_BAD_REQUEST, "Invalid Tenant ID format" );
-		}
+		
 		finally
 		{
+			// Always clean up ThreadLocal references post-execution to prevent container pool memory leaks
 			TenantContextHolder.clear();
 		}
 		
-	}	
+	}
+	
 }
