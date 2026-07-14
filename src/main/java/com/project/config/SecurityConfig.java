@@ -6,6 +6,8 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
@@ -33,6 +35,10 @@ public class SecurityConfig
 				// 1. Disable CSRF(Cross-Site Request Forgery) as our application will transition to a fully stateless JWT model
 				.csrf( AbstractHttpConfigurer::disable )
 				
+				.formLogin( AbstractHttpConfigurer :: disable )
+				
+				.httpBasic( AbstractHttpConfigurer :: disable )
+				
 				// 2. Enforce a completely stateless execution footprint (No HTTP Sessions allowed)
 				.sessionManagement( session -> session.sessionCreationPolicy( SessionCreationPolicy.STATELESS ) )
 				
@@ -48,6 +54,12 @@ public class SecurityConfig
 				// 4. Injecting custom TenantFilter into the pipeline
 				.addFilterBefore( tenantFilter, UsernamePasswordAuthenticationFilter.class );
 		return http.build();
+		
+	}
+	
+	@Bean
+	public PasswordEncoder passwordEncoder() {
+		return new BCryptPasswordEncoder( 12 );
 		
 	}
 	

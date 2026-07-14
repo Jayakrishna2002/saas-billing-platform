@@ -49,4 +49,6 @@ public interface UserRepository extends JpaRepository<User , UUID>
 			""" )
 	public boolean existsByTenantIdAndUserId( String email, UUID tenantId );
 	
+	public Optional<User> findByEmail( String email );
+	
 }

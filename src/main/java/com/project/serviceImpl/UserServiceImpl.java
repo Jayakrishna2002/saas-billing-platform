@@ -7,6 +7,7 @@ import java.util.UUID;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -43,39 +44,51 @@ public class UserServiceImpl implements UserService
 	@Autowired
 	public TenantMembershipRepository membershipRepository;
 	
-	public UserServiceImpl(	UserRepository userRepository, TenantRepository tenantRepository,	TenantMembershipRepository membershipRepository	)
+	private final org.springframework.security.crypto.password.PasswordEncoder passwordEncoder;
+	
+	public UserServiceImpl(	UserRepository userRepository, TenantRepository tenantRepository,	TenantMembershipRepository membershipRepository, PasswordEncoder passwordEncoder	)
 	{
 		this.userRepository = userRepository;
 		this.tenantRepository = tenantRepository;
 		this.membershipRepository = membershipRepository;
+		this.passwordEncoder = passwordEncoder;
 	}
 	
 	@Override
+	@Transactional
 	public UserResponse createUser( UserRequest request )
 	{
-		
+
+		// 1. Resolve Tenant Context via a Secure Fallback Pattern
 		UUID tenantId = TenantContextHolder.getTenantId();
 		
 		if ( tenantId == null )
 		{
-			throw new IllegalArgumentException( "Tenant ID must not be null" );
+				// Fallback to checking the payload contract if the request didn't carry a token
+			tenantId = request.getTenantId();
 		}
+		
+		// Fail-fast guardrail if absolutely no tenant context can be resolved
+	    if (tenantId == null)
+	    {
+	   	 throw new IllegalArgumentException( "Multi-tenant tracking violation: Tenant ID must not be null" );
+	    }
 		
 		Tenant tenant = tenantRepository.findById( tenantId )
 				.orElseThrow( () -> new TenantNotFoundException( "Tenant not found" ) );
 		
+		// 2. Case-Insensitive Email Normalization to avoid multi-tenant collation issues
 		String emailLower = request.getEmail().toLowerCase().trim();
 		
+		
+		// 4. Construct Entity and Cryptographically Hash the password
 		User user = new User();
 		user.setEmail( emailLower );
 		user.setName( request.getName() );
 		user.setActive( true );
+		user.setPassword( passwordEncoder.encode( request.getPassword() ) );
 		
 		boolean isEmailExist = userRepository.existsByTenantIdAndUserId( user.getEmail(), tenantId );
-		log.error( "isEmailExist" + isEmailExist );
-		
-		log.error( "Email : " + user.getEmail() );
-		
 		if ( isEmailExist )
 		{
 			throw new DuplicateUserException( "Email already exists for this tenant" );

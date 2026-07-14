@@ -33,7 +33,7 @@ public class CachedTenantResolverServiceImpl implements CachedTenantResolverServ
 	public boolean isTenantActive( UUID tenantId )
 	{
 		
-		String cahceKey = CACHE_PREFIX + tenantId;
+		String cahceKey = CACHE_PREFIX + tenantId.toString();
 		
 		try
 		{

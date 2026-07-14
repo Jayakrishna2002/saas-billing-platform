@@ -6,6 +6,7 @@ import java.util.UUID;
 
 import com.project.audit.Audit;
 
+import jakarta.annotation.Nonnull;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -50,6 +51,9 @@ public class User extends Audit
 	private boolean active = true;
 	
 	private Instant deleteAt;
+	
+	@Nonnull
+	private String password;
 	
 	public User( UUID id, String email, String name, boolean active, Instant deleteAt )
 	{

@@ -37,4 +37,6 @@ public interface TenantMembershipRepository extends JpaRepository<TenantMembersh
 
 	public Optional<TenantMembership> findByIdAndTenant_Id( UUID membershipId, UUID tenantId ); 
 	
+	public Optional<TenantMembership> findByUserId( UUID userId );
+	
 }
